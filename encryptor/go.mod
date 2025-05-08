@@ -1,4 +1,4 @@
-module encryptor
+module github.com/clangenb/dynamis/encryptor
 
 go 1.24.1
 

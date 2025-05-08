@@ -10,7 +10,7 @@ func main() {
 	deviceID := "device123"              // Example device ID
 
 	// Fetch and decrypt the audio
-	if err := fetchAndDecryptAudio(audioID, userID, deviceID, serverURL); err != nil {
+	if err := FetchAndDecryptAudio(audioID, userID, deviceID, serverURL); err != nil {
 		fmt.Printf("Error: %v\n", err)
 	}
 }

@@ -12,7 +12,7 @@ import (
 )
 
 // Fetches the decryption key for the given audio file ID
-func fetchDecryptionKey(audioID, userID, deviceID, serverURL string) ([]byte, error) {
+func FetchDecryptionKey(audioID, userID, deviceID, serverURL string) ([]byte, error) {
 	url := fmt.Sprintf("%s/key/%s", serverURL, audioID)
 
 	// Create a new HTTP client with a timeout
@@ -60,7 +60,7 @@ func fetchDecryptionKey(audioID, userID, deviceID, serverURL string) ([]byte, er
 }
 
 // Decrypts the audio content using the given decryption key
-func decryptAudio(encryptedData []byte, key []byte) ([]byte, error) {
+func DecryptAudio(encryptedData []byte, key []byte) ([]byte, error) {
 	// Generate nonce (12 bytes) from the first 12 bytes of the hash
 	nonce := key[:12] // You might want to adjust nonce creation as per your server's method
 
@@ -85,21 +85,21 @@ func decryptAudio(encryptedData []byte, key []byte) ([]byte, error) {
 }
 
 // Fetches and saves the encrypted and decrypted audio content
-func fetchAndDecryptAudio(audioID, userID, deviceID, serverURL string) error {
+func FetchAndDecryptAudio(audioID, userID, deviceID, serverURL string) error {
 	// Step 1: Fetch the encrypted audio
-	encryptedAudio, err := fetchAudio(audioID, serverURL)
+	encryptedAudio, err := FetchAudio(audioID, serverURL)
 	if err != nil {
 		return fmt.Errorf("failed to fetch audio: %v", err)
 	}
 
 	// Step 2: Fetch the decryption key
-	key, err := fetchDecryptionKey(audioID, userID, deviceID, serverURL)
+	key, err := FetchDecryptionKey(audioID, userID, deviceID, serverURL)
 	if err != nil {
 		return fmt.Errorf("failed to fetch decryption key: %v", err)
 	}
 
 	// Step 3: Decrypt the audio
-	decryptedAudio, err := decryptAudio(encryptedAudio, key)
+	decryptedAudio, err := DecryptAudio(encryptedAudio, key)
 	if err != nil {
 		return fmt.Errorf("failed to decrypt audio: %v", err)
 	}
@@ -115,7 +115,7 @@ func fetchAndDecryptAudio(audioID, userID, deviceID, serverURL string) error {
 }
 
 // Fetches the encrypted audio
-func fetchAudio(audioID, serverURL string) ([]byte, error) {
+func FetchAudio(audioID, serverURL string) ([]byte, error) {
 	url := fmt.Sprintf("%s/audio/%s", serverURL, audioID)
 
 	client := &http.Client{

@@ -142,7 +142,7 @@ func TestFetchAndDecryptAudio(t *testing.T) {
 	// Mock /key endpoint
 	mockServer.HandleFunc("/key/test", func(w http.ResponseWriter, r *http.Request) {
 		expiration := time.Now().Add(7 * 24 * time.Hour).Unix()
-		mockKey := "mockkeymockkeymockkeymockkeymo"
+		mockKey := "mockkeymockkeymockkeymockkeymock"
 		encodedKey := base64.StdEncoding.EncodeToString([]byte(mockKey))
 		response := fmt.Sprintf("%d:%s", expiration, encodedKey)
 		w.Write([]byte(response))
@@ -153,8 +153,16 @@ func TestFetchAndDecryptAudio(t *testing.T) {
 		Addr:    ":8082",
 		Handler: mockServer,
 	}
-	go server.ListenAndServe()
+
+	go func() {
+		if err := server.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
+			t.Fatalf("Failed to start server: %v", err)
+		}
+	}()
 	defer server.Close()
+
+	// Wait a bit for the server to be ready
+	time.Sleep(time.Second)
 
 	// Run the full test to fetch, decrypt, and save audio
 	serverURL := "http://localhost:8082"
