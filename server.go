@@ -1,9 +1,6 @@
 package main
 
 import (
-	"crypto/aes"
-	"crypto/cipher"
-	"crypto/sha256"
 	"encoding/base64"
 	"fmt"
 	"io"
@@ -14,18 +11,44 @@ import (
 	"github.com/gorilla/mux"
 )
 
-var masterKey = []byte("your-32-byte-master-key---------") // 32 bytes!
-
-func NewRouter() *mux.Router {
-	r := mux.NewRouter()
-	r.HandleFunc("/audio/{id}", serveEncryptedAudio)
-	r.HandleFunc("/key/{id}", serveDecryptionKey)
-	return r
+// Server holds the configuration and dependencies for the HTTP server.
+type Server struct {
+	Port    string
+	Deriver KeyDeriver
+	router  *mux.Router
 }
 
-func serveEncryptedAudio(w http.ResponseWriter, r *http.Request) {
+// NewServer initializes a new server with the provided port and encryptor.
+func NewServer(port string, encryptor KeyDeriver) *Server {
+	s := &Server{
+		Port:    port,
+		Deriver: encryptor,
+		router:  mux.NewRouter(),
+	}
+	s.routes()
+	return s
+}
+
+func (s *Server) routes() {
+	s.router.HandleFunc("/audio/{id}", s.serveEncryptedAudio)
+	s.router.HandleFunc("/key/{id}", s.serveDecryptionKey)
+}
+
+// Start starts the HTTP server.
+func (s *Server) Start() error {
+	return http.ListenAndServe(fmt.Sprintf(":%s", s.Port), s.router)
+}
+
+func (s *Server) Router() *mux.Router {
+	return s.router
+}
+
+// serveEncryptedAudio serves encrypted audio files from the server.
+func (s *Server) serveEncryptedAudio(w http.ResponseWriter, r *http.Request) {
 	id := mux.Vars(r)["id"]
 	filePath := fmt.Sprintf("./audio/%s.enc", id)
+
+	fmt.Println("File Path: " + filePath)
 
 	file, err := os.Open(filePath)
 	if err != nil {
@@ -38,27 +61,23 @@ func serveEncryptedAudio(w http.ResponseWriter, r *http.Request) {
 	io.Copy(w, file)
 }
 
-func serveDecryptionKey(w http.ResponseWriter, r *http.Request) {
+// serveDecryptionKey serves a decryption key for the requested audio.
+func (s *Server) serveDecryptionKey(w http.ResponseWriter, r *http.Request) {
 	id := mux.Vars(r)["id"]
 	user := r.Header.Get("X-User-ID")
 	device := r.Header.Get("X-Device-ID")
 
-	key := deriveKey(id, user, device)
+	// Derive the key using the Deriver.
+	key, err := s.Deriver.DeriveKey(id, user, device)
+	if err != nil {
+		http.Error(w, "Failed to derive key", http.StatusInternalServerError)
+		return
+	}
+
+	// Set an expiration for the key (7 days from now)
 	expires := time.Now().Add(7 * 24 * time.Hour).Unix()
+
+	// Return the key and expiration time in the response.
 	response := fmt.Sprintf("%d:%s", expires, base64.StdEncoding.EncodeToString(key))
-
 	w.Write([]byte(response))
-}
-
-func deriveKey(audioID, userID, deviceID string) []byte {
-	// Use a SHA-256 hash as deterministic and fixed-length seed
-
-	input := []byte(audioID + userID + deviceID)
-	hash := sha256.Sum256(input)
-
-	block, _ := aes.NewCipher(masterKey)
-	gcm, _ := cipher.NewGCM(block)
-
-	nonce := hash[:gcm.NonceSize()] // Always safe (nonce size is 12)
-	return gcm.Seal(nil, nonce, hash[:], nil)[:32]
 }
