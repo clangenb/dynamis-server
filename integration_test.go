@@ -13,16 +13,6 @@ import (
 	"github.com/clangenb/dynamis/server"
 )
 
-// ----- Mock Deriver -----
-
-type MockDeriver struct {
-	Key []byte
-}
-
-func (m *MockDeriver) DeriveKey(audioID, userID, deviceID string) ([]byte, error) {
-	return m.Key, nil
-}
-
 // ----- Test -----
 
 func TestFullIntegration(t *testing.T) {
@@ -55,7 +45,7 @@ func TestFullIntegration(t *testing.T) {
 	defer os.Remove(audioPath)
 
 	// Start the real server using httptest
-	mockDeriver := &MockDeriver{Key: key}
+	mockDeriver := &server.Encryptor{MasterKey: key}
 	srv := server.NewServer("8080", mockDeriver)
 
 	router := srv.Router() // you’ll need to expose this in server.go: `func (s *Server) Router() http.Handler`

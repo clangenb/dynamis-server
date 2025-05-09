@@ -31,7 +31,7 @@ func NewServer(port string, encryptor KeyDeriver) *Server {
 
 func (s *Server) routes() {
 	s.router.HandleFunc("/audio/{id}", s.serveEncryptedAudio)
-	s.router.HandleFunc("/key/{id}", s.serveDecryptionKey)
+	s.router.HandleFunc("/key/{id}", s.serveDerivedCEK)
 }
 
 // Start starts the HTTP server.
@@ -61,14 +61,14 @@ func (s *Server) serveEncryptedAudio(w http.ResponseWriter, r *http.Request) {
 	io.Copy(w, file)
 }
 
-// serveDecryptionKey serves a decryption key for the requested audio.
-func (s *Server) serveDecryptionKey(w http.ResponseWriter, r *http.Request) {
+// serveDerivedCEK serves a decryption key for the requested audio.
+func (s *Server) serveDerivedCEK(w http.ResponseWriter, r *http.Request) {
 	id := mux.Vars(r)["id"]
 	user := r.Header.Get("X-User-ID")
 	device := r.Header.Get("X-Device-ID")
 
 	// Derive the key using the Deriver.
-	key, err := s.Deriver.DeriveKey(id, user, device)
+	key, err := s.Deriver.DeriveCEK(id, user, device)
 	if err != nil {
 		http.Error(w, "Failed to derive key", http.StatusInternalServerError)
 		return
