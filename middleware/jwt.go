@@ -53,3 +53,8 @@ func GetClaims(r *http.Request) *Claims {
 	claims, _ := r.Context().Value(ClaimsKey).(*Claims)
 	return claims
 }
+
+// WithClaims adds claims to the context
+func WithClaims(ctx context.Context, claims *Claims) context.Context {
+	return context.WithValue(ctx, ClaimsKey, claims)
+}

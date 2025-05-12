@@ -15,7 +15,7 @@ func ListTracks(w http.ResponseWriter, r *http.Request) {
 	claims := dynamis_middleware.GetClaims(r)
 
 	// Load tracks from the JSON file
-	tracks, err := database.LoadTracks("tracks.json")
+	tracks, err := database.LoadTracks("../data/tracks.json")
 	if err != nil {
 		http.Error(w, "Failed to load tracks", http.StatusInternalServerError)
 		log.Println(err)
