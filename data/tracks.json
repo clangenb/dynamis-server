@@ -2,7 +2,7 @@
   {
     "id": "1",
     "title": "Track 1",
-    "file_path": "data/audio/audio1-test.wav",
+    "file_path": "../data/audio/audio1-test.wav",
     "tier": "free"
   },
   {

@@ -18,9 +18,10 @@ func StreamAudio(w http.ResponseWriter, r *http.Request) {
 
 	// Get the track ID from the URL parameters
 	trackID := chi.URLParam(r, "trackID")
+	log.Println("Requested track ID:", trackID)
 
 	// Load tracks from the JSON file
-	tracks, err := database.LoadTracks("tracks.json")
+	tracks, err := database.LoadTracks("../data/tracks.json")
 	if err != nil {
 		http.Error(w, "Failed to load tracks", http.StatusInternalServerError)
 		log.Println(err)
