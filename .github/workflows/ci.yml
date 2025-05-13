@@ -2,9 +2,14 @@ name: Go CI
 
 on:
   push:
-    branches: [main]
+    branches: [ main ]
   pull_request:
-    branches: [main]
+    branches: [ main ]
+
+# cancel previous runs
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 jobs:
   lint:
@@ -12,9 +17,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Set GO version via common env file
+        run: cat .github/env >> $GITHUB_ENV
+
       - uses: actions/setup-go@v5
         with:
-          go-version: '1.22'
+          go-version: ${{env.GO_VERSION}}
 
       - uses: golangci/golangci-lint-action@v3
         with:
@@ -28,9 +36,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Set GO version via common env file
+        run: cat .github/env >> $GITHUB_ENV
+
       - uses: actions/setup-go@v5
         with:
-          go-version: '1.22'
+          go-version: ${{env.GO_VERSION}}
 
       - name: Download dependencies
         run: go mod download
@@ -40,13 +51,16 @@ jobs:
 
   test:
     runs-on: ubuntu-latest
-    needs: [lint, vet]  # Only run if lint and vet succeed
+    needs: [ lint, vet ]  # Only run if lint and vet succeed
     steps:
       - uses: actions/checkout@v4
 
+      - name: Set GO version via common env file
+        run: cat .github/env >> $GITHUB_ENV
+
       - uses: actions/setup-go@v5
         with:
-          go-version: '1.22'
+          go-version: ${{env.GO_VERSION}}
 
       - name: Download dependencies
         run: go mod download
