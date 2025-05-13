@@ -10,9 +10,14 @@ import (
 	"net/http"
 )
 
+// Curl the dev db with:
+// curl -X POST http://localhost:8080/login \                                                                                                                         ok | 10:36:30
+//   -H "Content-Type: application/json" \
+//   -d '{"email": "alice@example.com", "password": "alice"}'
+
 func main() {
 	// Initialize database
-	database.Init()
+	database.InitDevDb("./data/test.db")
 
 	// Create a new router
 	r := chi.NewRouter()
