@@ -12,11 +12,13 @@ func SetupDevEntries() error {
 	if err != nil {
 		return err
 	}
+	SetUserSubscriptions(alice().ID, alice().Subscriptions)
 
 	err = insertIfNotExists(bob())
 	if err != nil {
 		return err
 	}
+	SetUserSubscriptions(bob().ID, bob().Subscriptions)
 
 	return nil
 }
@@ -34,13 +36,15 @@ func insertIfNotExists(user *models.User) error {
 const AlicePwd = "alice"
 const BobPwd = "bob"
 
+var AllSubs = []string{"free", "premium", "vip"}
+
 func alice() *models.User {
 	hash, _ := models.HashPassword(AlicePwd)
 	return &models.User{
 		ID:            "1",
 		Email:         "alice@example.com",
 		PasswordHash:  hash,
-		Subscriptions: []string{"sub1", "sub2"},
+		Subscriptions: AllSubs,
 	}
 }
 
@@ -50,6 +54,6 @@ func bob() *models.User {
 		ID:            "2",
 		Email:         "bob@example.com",
 		PasswordHash:  hash,
-		Subscriptions: []string{"sub1", "sub2"},
+		Subscriptions: AllSubs,
 	}
 }

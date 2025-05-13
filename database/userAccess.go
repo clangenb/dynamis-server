@@ -62,3 +62,30 @@ func GetUserSubscriptions(userID string) ([]string, error) {
 	}
 	return subscriptions, nil
 }
+
+// SetUserSubscriptions sets the subscriptions for a user in the database
+func SetUserSubscriptions(userID string, subscriptions []string) error {
+	// Delete existing subscriptions
+	deleteQuery := `DELETE FROM subscriptions WHERE user_id = ?`
+	_, err := DB.Exec(deleteQuery, userID)
+	if err != nil {
+		return err
+	}
+
+	// Insert new subscriptions
+	insertQuery := `INSERT INTO subscriptions (user_id, tier) VALUES (?, ?)`
+	stmt, err := DB.Prepare(insertQuery)
+	if err != nil {
+		return err
+	}
+	defer stmt.Close()
+
+	for _, tier := range subscriptions {
+		_, err := stmt.Exec(userID, tier)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
