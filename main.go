@@ -4,8 +4,9 @@ import (
 	"dynamis-server/database"
 	"dynamis-server/handlers"
 	"dynamis-server/middleware"
+	"dynamis-server/utils"
 	"github.com/go-chi/chi/v5"
-
+	"github.com/joho/godotenv"
 	"log"
 	"net/http"
 )
@@ -22,8 +23,23 @@ import (
 //  curl -X GET http://localhost:8080/tracks/<trackID> -H "Authorization: Bearer <JWT_TOKEN>"
 
 func main() {
+	if err := godotenv.Load(); err != nil {
+		log.Println("No .env file found (continuing anyway)")
+	}
+
 	// Initialize database
-	database.InitDevDb("./data/test.db")
+	database.InitDB()
+
+	switch utils.GetAppEnv() {
+	case utils.AppEnvDev:
+		log.Println("Running in development mode")
+		err := database.SetupDevEntries()
+		if err != nil {
+			log.Fatalf("Failed to set up dev entries: %v", err)
+		}
+	case utils.AppEnvProd:
+		log.Println("Running in production mode")
+	}
 
 	// Create a new router
 	r := chi.NewRouter()

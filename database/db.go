@@ -4,20 +4,24 @@ import (
 	"database/sql"
 	_ "github.com/mattn/go-sqlite3"
 	"log"
+	"os"
 )
 
 var DB *sql.DB
-var dbPath string
 
-// Ensure database and table exist
-func Init(dbFile string) error {
-	dbPath = dbFile
-	return initDB()
+const DBPathEnv = "DB_PATH"
+
+func dbFilePath() string {
+	path := os.Getenv(DBPathEnv)
+	if path == "" {
+		path = "data/db.sqlite"
+	}
+	return path
 }
 
-func initDB() error {
+func InitDB() error {
 	var err error
-	DB, err = sql.Open("sqlite3", dbPath)
+	DB, err = sql.Open("sqlite3", dbFilePath())
 	if err != nil {
 		log.Fatalf("Failed to connect to database: %v", err)
 	}

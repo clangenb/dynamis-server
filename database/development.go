@@ -1,25 +1,34 @@
 package database
 
-import "dynamis-server/models"
+import (
+	"dynamis-server/models"
+	"log"
+)
 
-// InitDevDb initializes the development database with test data
-func InitDevDb(path string) error {
-	err := Init(path)
+// InitDevDB initializes the development database with test data
+func SetupDevEntries() error {
+
+	err := insertIfNotExists(alice())
 	if err != nil {
 		return err
 	}
 
-	err = InsertUser(alice())
-	if err != nil {
-		return err
-	}
-
-	err = InsertUser(bob())
+	err = insertIfNotExists(bob())
 	if err != nil {
 		return err
 	}
 
 	return nil
+}
+
+func insertIfNotExists(user *models.User) error {
+	maybeUser, _ := GetUserByEmail(user.Email)
+	if maybeUser != nil {
+		log.Printf("Skip setting up existing dev user %s", user.Email)
+		return nil
+	}
+
+	return InsertUser(user)
 }
 
 const AlicePwd = "alice"
