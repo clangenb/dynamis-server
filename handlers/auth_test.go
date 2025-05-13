@@ -94,8 +94,10 @@ func TestLoginHandler_InvalidRequest(t *testing.T) {
 	assert.Equal(t, http.StatusBadRequest, rr.Code)
 }
 
-func setupTestDB(_ *testing.T) {
-	err := database.Init(":memory:")
+func setupTestDB(t *testing.T) {
+	set(t, database.DBPathEnv, ":memory:")
+
+	err := database.InitDB()
 	if err != nil {
 		log.Fatalf("Failed to init test db: %v", err)
 	}

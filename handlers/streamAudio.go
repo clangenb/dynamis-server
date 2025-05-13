@@ -11,6 +11,20 @@ import (
 	"os"
 )
 
+const AudioRootPathEnv = "AUDIO_ROOT_PATH"
+
+func audioRootPath() string {
+	path := os.Getenv(AudioRootPathEnv)
+	if path == "" {
+		path = "data/audio"
+	}
+	return path
+}
+
+func audioFilePath(localPath string) string {
+	return audioRootPath() + "/" + localPath
+}
+
 // StreamAudio streams the requested audio file if the user has access.
 func StreamAudio(w http.ResponseWriter, r *http.Request) {
 	// Get user claims from the context
@@ -58,7 +72,7 @@ func StreamAudio(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Open the audio file for streaming
-	audioFile, err := os.Open(track.FilePath)
+	audioFile, err := os.Open(audioFilePath(track.FilePath))
 	if err != nil {
 		http.Error(w, "Failed to open audio file", http.StatusInternalServerError)
 		log.Println(err)

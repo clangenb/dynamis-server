@@ -1,14 +1,12 @@
 package handlers_test
 
 import (
-	"dynamis-server/database"
 	"dynamis-server/handlers"
 	"dynamis-server/middleware"
 	"dynamis-server/models"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
-	"os"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -62,11 +60,4 @@ func TestListTracks_NoMatchingTracks(t *testing.T) {
 	err := json.NewDecoder(rr.Body).Decode(&response)
 	assert.NoError(t, err)
 	assert.Empty(t, response)
-}
-
-func setEnv(t *testing.T) {
-	err := os.Setenv(database.TracksEnv, "../data/tracks.json")
-	if err != nil {
-		t.Fatalf("Failed to set environment variable: %v", err)
-	}
 }

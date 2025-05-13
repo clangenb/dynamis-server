@@ -2,17 +2,33 @@ package handlers_test
 
 import (
 	"context"
+	"dynamis-server/database"
 	"dynamis-server/handlers"
 	"dynamis-server/middleware"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"testing"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/stretchr/testify/assert"
 )
 
+func setEnv(t *testing.T) {
+	set(t, database.TracksEnv, "../data/tracks.json")
+	set(t, handlers.AudioRootPathEnv, "../data/audio")
+}
+
+func set(t *testing.T, key, value string) {
+	err := os.Setenv(key, value)
+	if err != nil {
+		t.Fatalf("Failed to set environment variable %v: %v", handlers.AudioRootPathEnv, err)
+	}
+}
+
 func TestStreamAudio_ValidAccess(t *testing.T) {
+	setEnv(t)
+
 	// Mock claims
 	claims := &dynamis_middleware.Claims{
 		Subscriptions: []string{"free"},
@@ -38,6 +54,8 @@ func TestStreamAudio_ValidAccess(t *testing.T) {
 }
 
 func TestStreamAudio_TrackNotFound(t *testing.T) {
+	setEnv(t)
+
 	// Mock claims
 	claims := &dynamis_middleware.Claims{
 		Subscriptions: []string{"free"},
@@ -62,6 +80,8 @@ func TestStreamAudio_TrackNotFound(t *testing.T) {
 }
 
 func TestStreamAudio_UnauthorizedAccess(t *testing.T) {
+	setEnv(t)
+
 	// Mock claims
 	claims := &dynamis_middleware.Claims{
 		Subscriptions: []string{"premium"},
