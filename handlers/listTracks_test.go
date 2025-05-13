@@ -1,31 +1,22 @@
 package handlers_test
 
 import (
+	"dynamis-server/database"
 	"dynamis-server/handlers"
 	"dynamis-server/middleware"
 	"dynamis-server/models"
 	"encoding/json"
-	"errors"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
 
-// Mock implementation of LoadTracks
-func mockLoadTracks(filePath string) ([]models.Track, error) {
-	if filePath == "error" {
-		return nil, errors.New("failed to load tracks")
-	}
-	return []models.Track{
-		{ID: "1", Title: "Track 1", FilePath: "path1", Tier: "free"},
-		{ID: "2", Title: "Track 2", FilePath: "path2", Tier: "premium"},
-		{ID: "3", Title: "Track 3", FilePath: "path3", Tier: "vip"},
-	}, nil
-}
-
 func TestListTracks_ValidFiltering(t *testing.T) {
+	setEnv(t)
+
 	// Mock claims
 	claims := &dynamis_middleware.Claims{
 		Subscriptions: []string{"free", "premium"},
@@ -50,6 +41,8 @@ func TestListTracks_ValidFiltering(t *testing.T) {
 }
 
 func TestListTracks_NoMatchingTracks(t *testing.T) {
+	setEnv(t)
+
 	// Mock claims
 	claims := &dynamis_middleware.Claims{
 		Subscriptions: []string{"nonexistent"},
@@ -69,4 +62,11 @@ func TestListTracks_NoMatchingTracks(t *testing.T) {
 	err := json.NewDecoder(rr.Body).Decode(&response)
 	assert.NoError(t, err)
 	assert.Empty(t, response)
+}
+
+func setEnv(t *testing.T) {
+	err := os.Setenv(database.TracksEnv, "../data/tracks.json")
+	if err != nil {
+		t.Fatalf("Failed to set environment variable: %v", err)
+	}
 }

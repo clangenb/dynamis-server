@@ -21,7 +21,7 @@ func StreamAudio(w http.ResponseWriter, r *http.Request) {
 	log.Println("Requested track ID:", trackID)
 
 	// Load tracks from the JSON file
-	tracks, err := database.LoadTracks("../data/tracks.json")
+	tracks, err := database.LoadTracks()
 	if err != nil {
 		http.Error(w, "Failed to load tracks", http.StatusInternalServerError)
 		log.Println(err)
