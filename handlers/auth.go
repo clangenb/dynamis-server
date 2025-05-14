@@ -32,7 +32,8 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Generate the JWT token
-	token, err := utils.GenerateJWT(user)
+	service := utils.NewJWTService()
+	token, err := service.Generate(user)
 	if err != nil {
 		http.Error(w, "Failed to generate token", http.StatusInternalServerError)
 		return

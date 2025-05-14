@@ -15,6 +15,7 @@ import (
 )
 
 func TestLoginHandler_ValidCredentials(t *testing.T) {
+	setEnv(t)
 	setupTestDB(t)
 
 	password := "validpassword"
@@ -49,6 +50,7 @@ func TestLoginHandler_ValidCredentials(t *testing.T) {
 }
 
 func TestLoginHandler_InvalidCredentials(t *testing.T) {
+	setEnv(t)
 	setupTestDB(t)
 
 	password := "validpassword"
@@ -80,6 +82,7 @@ func TestLoginHandler_InvalidCredentials(t *testing.T) {
 }
 
 func TestLoginHandler_InvalidRequest(t *testing.T) {
+	setEnv(t)
 	// Create request with invalid JSON
 	req := httptest.NewRequest(http.MethodPost, "/login", bytes.NewBuffer([]byte("invalid json")))
 	req.Header.Set("Content-Type", "application/json")
