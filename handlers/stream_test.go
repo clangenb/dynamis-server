@@ -5,6 +5,7 @@ import (
 	"dynamis-server/database"
 	"dynamis-server/handlers"
 	"dynamis-server/middleware"
+	"dynamis-server/utils"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -17,6 +18,7 @@ import (
 func setEnv(t *testing.T) {
 	set(t, database.TracksEnv, "../data/tracks.json")
 	set(t, handlers.AudioRootPathEnv, "../data/audio")
+	set(t, utils.JWTSecretEnv, "test-secret")
 }
 
 func set(t *testing.T, key, value string) {
