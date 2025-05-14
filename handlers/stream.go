@@ -14,15 +14,15 @@ import (
 
 const AudioRootPathEnv = "AUDIO_ROOT_PATH"
 
-func audioRootPath() string {
+func AudioRootPath() string {
 	if path, ok := os.LookupEnv(AudioRootPathEnv); ok && path != "" {
 		return path
 	}
 	return "data/audio"
 }
 
-func audioFilePath(localPath string) string {
-	return filepath.Join(audioRootPath(), localPath)
+func AudioFilePath(localPath string) string {
+	return filepath.Join(AudioRootPath(), localPath)
 }
 
 // StreamAudio streams the requested audio file if the user has access.
@@ -56,7 +56,7 @@ func StreamAudio(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	audioFile, err := os.Open(audioFilePath(track.FilePath))
+	audioFile, err := os.Open(AudioFilePath(track.FilePath))
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, "Failed to open audio file", err)
 		return
