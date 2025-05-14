@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"dynamis-server"
 	"encoding/json"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -45,6 +46,21 @@ func TestAliceCanAccessTracks(t *testing.T) {
 	assert.NoError(t, err)
 
 	assert.Equal(t, expectedTracks(), tracks, "Response does not match the expected output")
+
+	// Step 3: Access track with ID 1
+	trackID := "1"
+	req, err = http.NewRequest(http.MethodGet, server.URL+"/tracks/"+trackID, nil)
+	assert.NoError(t, err)
+	req.Header.Set("Authorization", "Bearer "+token)
+
+	trackResp, err := client.Do(req)
+	assert.NoError(t, err)
+	assert.Equal(t, http.StatusOK, trackResp.StatusCode)
+
+	trackContent, err := io.ReadAll(trackResp.Body)
+	assert.NoError(t, err)
+
+	assert.Equal(t, "test1\n", string(trackContent), "Track response does not match the expected output")
 }
 
 func expectedTracks() []map[string]interface{} {
