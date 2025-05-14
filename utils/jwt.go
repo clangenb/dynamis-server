@@ -1,7 +1,6 @@
 package utils
 
 import (
-	"dynamis-server/middleware"
 	"dynamis-server/models"
 	"github.com/golang-jwt/jwt/v5"
 	"os"
@@ -16,11 +15,16 @@ type JWTService struct {
 
 const JWTSecretEnv = "JWT_SECRET"
 
-func NewJWTService() *JWTService {
+func GetJWTSecret() string {
 	secret := os.Getenv(JWTSecretEnv)
 	if secret == "" {
 		panic("JWT_SECRET is not set") // or use a default/fallback for dev
 	}
+	return secret
+}
+
+func NewJWTService() *JWTService {
+	secret := GetJWTSecret()
 	return &JWTService{
 		secret: []byte(secret),
 		issuer: issuerFromEnv(),
@@ -30,7 +34,7 @@ func NewJWTService() *JWTService {
 
 // GenerateJWT generates a JWT token for the authenticated user
 func (s *JWTService) Generate(user *models.User) (string, error) {
-	claims := dynamis_middleware.Claims{
+	claims := models.Claims{
 		UserID:        user.ID,
 		Subscriptions: user.Subscriptions,
 		RegisteredClaims: jwt.RegisteredClaims{

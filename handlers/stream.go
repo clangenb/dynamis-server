@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"dynamis-server/database"
-	jwtmiddleware "dynamis-server/middleware"
 	"dynamis-server/models"
 	"github.com/go-chi/chi/v5"
 	"io"
@@ -27,7 +26,7 @@ func AudioFilePath(localPath string) string {
 
 // StreamAudio streams the requested audio file if the user has access.
 func StreamAudio(w http.ResponseWriter, r *http.Request) {
-	claims := jwtmiddleware.GetClaims(r)
+	claims := models.GetClaims(r)
 	trackID := chi.URLParam(r, "trackID")
 	log.Printf("Requested track ID: %s", trackID)
 
