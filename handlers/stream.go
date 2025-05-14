@@ -25,15 +25,6 @@ func audioFilePath(localPath string) string {
 	return filepath.Join(audioRootPath(), localPath)
 }
 
-func respondWithError(w http.ResponseWriter, statusCode int, message string, err error) {
-	http.Error(w, message, statusCode)
-	if err != nil {
-		log.Printf("Error: %s - %v", message, err)
-	} else {
-		log.Printf("Error: %s", message)
-	}
-}
-
 // StreamAudio streams the requested audio file if the user has access.
 func StreamAudio(w http.ResponseWriter, r *http.Request) {
 	claims := jwtmiddleware.GetClaims(r)
