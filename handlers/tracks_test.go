@@ -2,7 +2,6 @@ package handlers_test
 
 import (
 	"dynamis-server/handlers"
-	"dynamis-server/middleware"
 	"dynamis-server/models"
 	"encoding/json"
 	"net/http"
@@ -16,11 +15,11 @@ func TestListTracks_ValidFiltering(t *testing.T) {
 	setEnv(t)
 
 	// Mock claims
-	claims := &dynamis_middleware.Claims{
+	claims := &models.Claims{
 		Subscriptions: []string{"free", "premium"},
 	}
 	r := httptest.NewRequest(http.MethodGet, "/tracks", nil)
-	r = r.WithContext(dynamis_middleware.WithClaims(r.Context(), claims))
+	r = r.WithContext(models.WithClaims(r.Context(), claims))
 
 	// Create response recorder
 	rr := httptest.NewRecorder()
@@ -42,11 +41,11 @@ func TestListTracks_NoMatchingTracks(t *testing.T) {
 	setEnv(t)
 
 	// Mock claims
-	claims := &dynamis_middleware.Claims{
+	claims := &models.Claims{
 		Subscriptions: []string{"nonexistent"},
 	}
 	r := httptest.NewRequest(http.MethodGet, "/tracks", nil)
-	r = r.WithContext(dynamis_middleware.WithClaims(r.Context(), claims))
+	r = r.WithContext(models.WithClaims(r.Context(), claims))
 
 	// Create response recorder
 	rr := httptest.NewRecorder()

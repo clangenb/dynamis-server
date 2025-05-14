@@ -4,7 +4,7 @@ import (
 	"context"
 	"dynamis-server/database"
 	"dynamis-server/handlers"
-	"dynamis-server/middleware"
+	"dynamis-server/models"
 	"dynamis-server/utils"
 	"net/http"
 	"net/http/httptest"
@@ -53,11 +53,11 @@ func TestStreamAudio_ValidAccess(t *testing.T) {
 	setEnv(t)
 
 	// Mock claims
-	claims := &dynamis_middleware.Claims{
+	claims := &models.Claims{
 		Subscriptions: []string{"free"},
 	}
 	r := httptest.NewRequest(http.MethodGet, "/tracks/1", nil)
-	r = r.WithContext(dynamis_middleware.WithClaims(r.Context(), claims))
+	r = r.WithContext(models.WithClaims(r.Context(), claims))
 
 	// Mock URL parameter
 	rctx := chi.NewRouteContext()
@@ -80,11 +80,11 @@ func TestStreamAudio_TrackNotFound(t *testing.T) {
 	setEnv(t)
 
 	// Mock claims
-	claims := &dynamis_middleware.Claims{
+	claims := &models.Claims{
 		Subscriptions: []string{"free"},
 	}
 	r := httptest.NewRequest(http.MethodGet, "/tracks", nil)
-	r = r.WithContext(dynamis_middleware.WithClaims(r.Context(), claims))
+	r = r.WithContext(models.WithClaims(r.Context(), claims))
 
 	// Mock URL parameter
 	rctx := chi.NewRouteContext()
@@ -106,11 +106,11 @@ func TestStreamAudio_UnauthorizedAccess(t *testing.T) {
 	setEnv(t)
 
 	// Mock claims
-	claims := &dynamis_middleware.Claims{
+	claims := &models.Claims{
 		Subscriptions: []string{"premium"},
 	}
 	r := httptest.NewRequest(http.MethodGet, "/tracks/1", nil)
-	r = r.WithContext(dynamis_middleware.WithClaims(r.Context(), claims))
+	r = r.WithContext(models.WithClaims(r.Context(), claims))
 
 	// Mock URL parameter
 	rctx := chi.NewRouteContext()
@@ -131,11 +131,11 @@ func TestStreamAudio_UnauthorizedAccess(t *testing.T) {
 // Todo: how to mock?
 //func TestStreamAudio_FileOpenError(t *testing.T) {
 //	// Mock claims
-//	claims := &dynamis_middleware.Claims{
+//	claims := &models.Claims{
 //		Subscriptions: []string{"free"},
 //	}
 //	r := httptest.NewRequest(http.MethodGet, "/tracks/1", nil)
-//	r = r.WithContext(dynamis_middleware.WithClaims(r.Context(), claims))
+//	r = r.WithContext(models.WithClaims(r.Context(), claims))
 //
 //	// Mock URL parameter
 //	rctx := chi.NewRouteContext()

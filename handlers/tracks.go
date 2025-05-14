@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"dynamis-server/database"
-	"dynamis-server/middleware"
 	"dynamis-server/models"
 	"encoding/json"
 	"net/http"
@@ -10,7 +9,7 @@ import (
 
 // ListTracks returns a list of audio tracks filtered by subscription tier.
 func ListTracks(w http.ResponseWriter, r *http.Request) {
-	claims := dynamis_middleware.GetClaims(r)
+	claims := models.GetClaims(r)
 
 	tracks, err := database.LoadTracks()
 	if err != nil {
