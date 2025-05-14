@@ -3,6 +3,7 @@ package dynamis_middleware
 import (
 	"context"
 	"net/http"
+	"os"
 	"strings"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -12,13 +13,22 @@ type contextKey string
 
 const (
 	ClaimsKey contextKey = "claims"
-	SecretKey            = "your-secret-key" // replace with os.Getenv("JWT_SECRET") in production
 )
 
 type Claims struct {
 	UserID        string   `json:"sub"`
 	Subscriptions []string `json:"subscriptions"`
 	jwt.RegisteredClaims
+}
+
+const jWTSecretEnv = "JWT_SECRET"
+
+func getJwtSecret() string {
+	secret := os.Getenv(jWTSecretEnv)
+	if secret == "" {
+		panic("JWT_SECRET is not set") // or use a default/fallback for dev
+	}
+	return secret
 }
 
 func JWTAuth(next http.Handler) http.Handler {
@@ -31,7 +41,7 @@ func JWTAuth(next http.Handler) http.Handler {
 
 		tokenStr := strings.TrimPrefix(authHeader, "Bearer ")
 		token, err := jwt.ParseWithClaims(tokenStr, &Claims{}, func(token *jwt.Token) (interface{}, error) {
-			return []byte(SecretKey), nil
+			return []byte(getJwtSecret()), nil
 		})
 		if err != nil || !token.Valid {
 			http.Error(w, "Invalid token", http.StatusUnauthorized)
