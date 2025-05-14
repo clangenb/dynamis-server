@@ -22,7 +22,7 @@ import (
 // 3. Use the token to access a specific track
 //  curl -X GET http://localhost:8080/tracks/<trackID> -H "Authorization: Bearer <JWT_TOKEN>"
 
-func main() {
+func Main() {
 	if err := godotenv.Load(); err != nil {
 		log.Println("No .env file found (continuing anyway)")
 	}
