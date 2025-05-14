@@ -3,7 +3,6 @@ package database
 import (
 	"dynamis-server/models"
 	"encoding/json"
-	"io/ioutil"
 	"os"
 )
 
@@ -19,7 +18,7 @@ func tracksFilePath() string {
 
 // Loads the tracks from the JSON file reading the path from env or from default.
 func LoadTracks() ([]models.Track, error) {
-	data, err := ioutil.ReadFile(tracksFilePath())
+	data, err := os.ReadFile(tracksFilePath())
 	if err != nil {
 		return nil, err
 	}
