@@ -32,7 +32,7 @@ func NewJWTService() *JWTService {
 	}
 }
 
-// GenerateJWT generates a JWT token for the authenticated user
+// Generate a JWT token for the authenticated user
 func (s *JWTService) Generate(user *models.User) (string, error) {
 	claims := models.Claims{
 		UserID:        user.ID,

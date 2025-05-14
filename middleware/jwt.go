@@ -16,6 +16,7 @@ const (
 	BearerPrefix        = "Bearer "
 )
 
+// JWTAuth is a middleware that checks for a valid JWT token in the Authorization header.
 func JWTAuth(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		authHeader := r.Header.Get(AuthorizationHeader)
