@@ -95,7 +95,7 @@ func expectedTracks() []map[string]interface{} {
 	var tracks []map[string]interface{}
 	err := json.Unmarshal([]byte(jsonData), &tracks)
 	if err != nil {
-		panic("Error unmarshaling JSON:" + err.Error())
+		panic("Error unmarshalling JSON:" + err.Error())
 	}
 	return tracks
 }
