@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/go-chi/chi/v5"
@@ -26,6 +27,26 @@ func set(t *testing.T, key, value string) {
 	if err != nil {
 		t.Fatalf("Failed to set environment variable %v: %v", handlers.AudioRootPathEnv, err)
 	}
+}
+
+func TestAudioRootPath(t *testing.T) {
+	// Test with environment variable set
+	os.Setenv(handlers.AudioRootPathEnv, "/custom/audio/path")
+
+	assert.Equal(t, "/custom/audio/path", handlers.AudioRootPath())
+
+	// Test with environment variable unset
+	os.Unsetenv(handlers.AudioRootPathEnv)
+	assert.Equal(t, "data/audio", handlers.AudioRootPath())
+}
+
+func TestAudioFilePath(t *testing.T) {
+	// Mock the root path
+	os.Setenv(handlers.AudioRootPathEnv, "/custom/audio/path")
+
+	// Test file path joining
+	expectedPath := filepath.Join("/custom/audio/path", "test/file.wav")
+	assert.Equal(t, expectedPath, handlers.AudioFilePath("test/file.wav"))
 }
 
 func TestStreamAudio_ValidAccess(t *testing.T) {

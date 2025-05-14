@@ -9,36 +9,31 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"path/filepath"
 )
 
 const AudioRootPathEnv = "AUDIO_ROOT_PATH"
 
-func audioRootPath() string {
-	path := os.Getenv(AudioRootPathEnv)
-	if path == "" {
-		path = "data/audio"
+func AudioRootPath() string {
+	if path, ok := os.LookupEnv(AudioRootPathEnv); ok && path != "" {
+		return path
 	}
-	return path
+	return "data/audio"
 }
 
-func audioFilePath(localPath string) string {
-	return audioRootPath() + "/" + localPath
+func AudioFilePath(localPath string) string {
+	return filepath.Join(AudioRootPath(), localPath)
 }
 
 // StreamAudio streams the requested audio file if the user has access.
 func StreamAudio(w http.ResponseWriter, r *http.Request) {
-	// Get user claims from the context
 	claims := jwtmiddleware.GetClaims(r)
-
-	// Get the track ID from the URL parameters
 	trackID := chi.URLParam(r, "trackID")
-	log.Println("Requested track ID:", trackID)
+	log.Printf("Requested track ID: %s", trackID)
 
-	// Load tracks from the JSON file
 	tracks, err := database.LoadTracks()
 	if err != nil {
-		http.Error(w, "Failed to load tracks", http.StatusInternalServerError)
-		log.Println(err)
+		respondWithError(w, http.StatusInternalServerError, "Failed to load tracks", err)
 		return
 	}
 
@@ -51,43 +46,35 @@ func StreamAudio(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	// If track not found
 	if track == nil {
-		http.Error(w, "Track not found", http.StatusNotFound)
+		respondWithError(w, http.StatusNotFound, "Track not found", nil)
 		return
 	}
 
-	// Check if the user has access to the track based on subscription
-	hasAccess := false
-	for _, sub := range claims.Subscriptions {
-		if track.Tier == sub {
-			hasAccess = true
-			break
-		}
-	}
-
-	if !hasAccess {
-		http.Error(w, "Unauthorized access to this track", http.StatusForbidden)
+	if !userHasAccess(claims.Subscriptions, track.Tier) {
+		respondWithError(w, http.StatusForbidden, "Unauthorized access to this track", nil)
 		return
 	}
 
-	// Open the audio file for streaming
-	audioFile, err := os.Open(audioFilePath(track.FilePath))
+	audioFile, err := os.Open(AudioFilePath(track.FilePath))
 	if err != nil {
-		http.Error(w, "Failed to open audio file", http.StatusInternalServerError)
-		log.Println(err)
+		respondWithError(w, http.StatusInternalServerError, "Failed to open audio file", err)
 		return
 	}
 	defer audioFile.Close()
 
-	// Set the correct content type for WAV files
 	w.Header().Set("Content-Type", "audio/wav")
-
-	// Stream the audio file
 	w.WriteHeader(http.StatusOK)
-	_, err = io.Copy(w, audioFile)
-	if err != nil {
-		http.Error(w, "Failed to stream audio", http.StatusInternalServerError)
-		log.Println(err)
+	if _, err := io.Copy(w, audioFile); err != nil {
+		respondWithError(w, http.StatusInternalServerError, "Failed to stream audio", err)
 	}
+}
+
+func userHasAccess(subscriptions []string, requiredTier string) bool {
+	for _, sub := range subscriptions {
+		if sub == requiredTier {
+			return true
+		}
+	}
+	return false
 }
