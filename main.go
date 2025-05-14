@@ -22,7 +22,22 @@ import (
 // 3. Use the token to access a specific track
 //  curl -X GET http://localhost:8080/tracks/<trackID> -H "Authorization: Bearer <JWT_TOKEN>"
 
-func Main() {
+// SetupRouter initializes the router with all routes and middleware.
+func SetupRouter() http.Handler {
+	// Create a new router
+	r := chi.NewRouter()
+
+	// Routes
+	r.Post("/login", handlers.LoginHandler) // Login endpoint
+
+	// Secure routes (need JWT auth)
+	r.With(dynamis_middleware.JWTAuth).Get("/tracks", handlers.ListTracks)
+	r.With(dynamis_middleware.JWTAuth).Get("/tracks/{trackID}", handlers.StreamAudio)
+
+	return r
+}
+
+func InitializeApp() {
 	if err := godotenv.Load(); err != nil {
 		log.Println("No .env file found (continuing anyway)")
 	}
@@ -40,18 +55,12 @@ func Main() {
 	case utils.AppEnvProd:
 		log.Println("Running in production mode")
 	}
+}
 
-	// Create a new router
-	r := chi.NewRouter()
-
-	// Routes
-	r.Post("/login", handlers.LoginHandler) // Login endpoint
-
-	// Secure routes (need JWT auth)
-	r.With(dynamis_middleware.JWTAuth).Get("/tracks", handlers.ListTracks)
-	r.With(dynamis_middleware.JWTAuth).Get("/tracks/{trackID}", handlers.StreamAudio)
+func main() {
+	InitializeApp()
 
 	// Start the server
 	log.Println("Starting server on :8080")
-	http.ListenAndServe(":8080", r)
+	http.ListenAndServe(":8080", SetupRouter())
 }

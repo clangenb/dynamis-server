@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"dynamis-server"
 	"encoding/json"
-	"log"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -13,10 +12,9 @@ import (
 )
 
 func TestAliceCanAccessTracks(t *testing.T) {
-	// Start the server
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		main.Main() // Call the main function to start the app
-	}))
+	main.InitializeApp()
+	// Start the test server with the application's router
+	server := httptest.NewServer(main.SetupRouter())
 	defer server.Close()
 
 	// Step 1: Login as Alice
@@ -27,9 +25,7 @@ func TestAliceCanAccessTracks(t *testing.T) {
 
 	var loginData map[string]string
 	err = json.NewDecoder(loginResp.Body).Decode(&loginData)
-	//assert.NoError(t, err)
-
-	log.Println(loginData)
+	assert.NoError(t, err)
 
 	token, ok := loginData["token"]
 	assert.True(t, ok, "Token not found in login response")
@@ -47,5 +43,37 @@ func TestAliceCanAccessTracks(t *testing.T) {
 	var tracks []map[string]interface{}
 	err = json.NewDecoder(tracksResp.Body).Decode(&tracks)
 	assert.NoError(t, err)
-	assert.NotEmpty(t, tracks, "Tracks should not be empty")
+
+	assert.Equal(t, expectedTracks(), tracks, "Response does not match the expected output")
+}
+
+func expectedTracks() []map[string]interface{} {
+	jsonData := `
+	[
+		{
+			"id": "1",
+			"title": "Track 1",
+			"file_path": "audio1-test.wav",
+			"tier": "free"
+		},
+		{
+			"id": "2",
+			"title": "Track 2",
+			"file_path": "audio2-test.wav",
+			"tier": "premium"
+		},
+		{
+			"id": "3",
+			"title": "Track 3",
+			"file_path": "audio3-test.wav",
+			"tier": "vip"
+		}
+	]`
+
+	var tracks []map[string]interface{}
+	err := json.Unmarshal([]byte(jsonData), &tracks)
+	if err != nil {
+		panic("Error unmarshaling JSON:" + err.Error())
+	}
+	return tracks
 }
