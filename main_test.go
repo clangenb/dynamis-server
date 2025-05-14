@@ -3,16 +3,22 @@ package main_test
 import (
 	"bytes"
 	"dynamis-server"
+	"dynamis-server/database"
+	"dynamis-server/handlers"
+	"dynamis-server/utils"
 	"encoding/json"
 	"io"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
 
 func TestAliceCanAccessTracks(t *testing.T) {
+	setEnv(t)
+
 	main.InitializeApp()
 	// Start the test server with the application's router
 	server := httptest.NewServer(main.SetupRouter())
@@ -92,4 +98,19 @@ func expectedTracks() []map[string]interface{} {
 		panic("Error unmarshaling JSON:" + err.Error())
 	}
 	return tracks
+}
+
+func setEnv(t *testing.T) {
+	set(t, database.TracksEnv, "data/tracks.json")
+	set(t, database.DBPathEnv, ":memory:")
+	set(t, handlers.AudioRootPathEnv, "data/audio")
+	set(t, utils.JWTSecretEnv, "test-secret")
+	set(t, utils.AppEnvEnvVar, utils.AppEnvDev)
+}
+
+func set(t *testing.T, key, value string) {
+	err := os.Setenv(key, value)
+	if err != nil {
+		t.Fatalf("Failed to set environment variable %v: %v", handlers.AudioRootPathEnv, err)
+	}
 }

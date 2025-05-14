@@ -38,10 +38,6 @@ func SetupRouter() http.Handler {
 }
 
 func InitializeApp() {
-	if err := godotenv.Load(); err != nil {
-		log.Println("No .env file found (continuing anyway)")
-	}
-
 	// Initialize database
 	database.InitDB()
 
@@ -58,6 +54,10 @@ func InitializeApp() {
 }
 
 func main() {
+	if err := godotenv.Load(); err != nil {
+		log.Println("No .env file found (continuing anyway)")
+	}
+
 	InitializeApp()
 
 	// Start the server
