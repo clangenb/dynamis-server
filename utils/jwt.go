@@ -8,8 +8,6 @@ import (
 	"time"
 )
 
-var signingKey = []byte("your-secret-key")
-
 type JWTService struct {
 	secret []byte
 	issuer string
