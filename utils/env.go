@@ -8,6 +8,7 @@ import (
 const AppEnvEnvVar = "APP_ENV"
 
 const AppEnvDev = "dev"
+const AppEnvStaging = "staging"
 const AppEnvProd = "prod"
 
 func GetAppEnv() string {
@@ -19,6 +20,10 @@ func GetAppEnv() string {
 }
 
 func IsDev() bool {
+	return GetAppEnv() == AppEnvDev
+}
+
+func IsStaging() bool {
 	return GetAppEnv() == AppEnvDev
 }
 
