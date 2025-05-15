@@ -20,7 +20,7 @@ import (
 //2. Use the token to access the tracks
 // curl -X GET http://localhost:8080/tracks -H "Authorization: Bearer <JWT_TOKEN>"
 // 3. Use the token to access a specific track
-//  curl -X GET http://localhost:8080/tracks/<trackID> -H "Authorization: Bearer <JWT_TOKEN>"
+//  curl -X GET http://localhost:8080/tracks/<trackID> -H "Authorization: Bearer <JWT_TOKEN>" --output <file>
 
 // SetupRouter initializes the router with all routes and middleware.
 func SetupRouter() http.Handler {
@@ -44,6 +44,12 @@ func InitializeApp() {
 	switch utils.GetAppEnv() {
 	case utils.AppEnvDev:
 		log.Println("Running in development mode")
+		err := database.SetupDevEntries()
+		if err != nil {
+			log.Fatalf("Failed to set up dev entries: %v", err)
+		}
+	case utils.AppEnvStaging:
+		log.Println("Running in staging mode")
 		err := database.SetupDevEntries()
 		if err != nil {
 			log.Fatalf("Failed to set up dev entries: %v", err)
