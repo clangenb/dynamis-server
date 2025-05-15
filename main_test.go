@@ -101,9 +101,9 @@ func expectedTracks() []map[string]interface{} {
 }
 
 func setEnv(t *testing.T) {
-	set(t, database.TracksEnv, "data/tracks.json")
+	set(t, database.TracksEnv, "data/dev/tracks.json")
 	set(t, database.DBPathEnv, ":memory:")
-	set(t, handlers.AudioRootPathEnv, "data/audio")
+	set(t, handlers.AudioRootPathEnv, "data/dev/audio")
 	set(t, utils.JWTSecretEnv, "test-secret")
 	set(t, utils.AppEnvEnvVar, utils.AppEnvDev)
 }
